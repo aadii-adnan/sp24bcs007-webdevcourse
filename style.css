@@ -1,0 +1,62 @@
+h2{
+    color: blue;
+    margin-bottom: 10px;
+    border-radius: 10px;
+}
+
+
+.skill-item{
+    background-color: azure;
+    border-radius: 5px;
+    padding :8px 15px;
+    border-left: 2px solid blue;
+}
+
+.summary{
+    background-color: bisque;
+    border-left: 5px solid orangered;
+    padding: 15px;
+    border-radius: 4px;
+    margin-bottom: 20px;
+
+
+
+}
+
+.contact-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center; /* Vertically centers the title with the text */
+    flex-wrap: wrap;
+    background-color: #e0e0e0; /* A slightly softer gray */
+    padding: 20px;
+    border-radius: 5px;
+    gap: 20px;
+  }
+
+
+  .column {
+    line-height: 1.6; /* Adds breathing room between lines */
+    font-size: 0.9rem;
+  }
+  
+  /* Tiny fix for the label-text spacing */
+  .column strong {
+    margin-right: 5px;
+  }
+h2{
+    border-bottom:  3px solid blue;
+    padding-bottom :8px;
+    padding: 8px 15px;
+
+}
+
+.skill-list{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 40px;
+}
+
+.contact-info{
+
+}
