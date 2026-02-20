@@ -1,0 +1,9 @@
+.boxmodel{
+    border: solid 5px gray;
+    padding : 10px 10px;
+    display : inline-block;
+    margin: 20px;
+    width: 33px;
+    height: 55px;
+
+}

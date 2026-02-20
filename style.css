@@ -57,6 +57,16 @@ h2{
     gap: 40px;
 }
 
-.contact-info{
+.image{
+  float: left;
+  width: 100px;
+  height: 100px;
+  object-fit: contain;
+  margin-right: 20px;
 
+}
+
+header{
+  overflow:auto;
+  padding: 15px;
 }

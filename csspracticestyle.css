@@ -1,0 +1,39 @@
+body{
+    background-image: url(images/download.jpeg);
+    background-size: cover;
+}
+
+h1{
+    color: #5A2971;
+    text-align: center;
+    border: 5px solid cadetblue;
+    cursor: pointer;
+}
+
+li {
+    display: inline-block;
+}
+
+p{
+    text-decoration: underline;
+    font-style: italic;
+    
+
+}
+
+img {
+    height :300px;
+    width : 450px;
+    transition:all 1s;
+}
+
+img:hover{
+    transform : scale (4);
+}
+
+.container{
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+
+}
