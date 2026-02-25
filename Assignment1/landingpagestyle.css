@@ -225,3 +225,99 @@ body {
     line-height: 1;
 }
 
+.fraud-marquee {
+    background-color: #cfcfcf;  /* Yellow */
+    color: #000;
+    overflow:visible;           /* Hides text outside the container */
+    white-space: nowrap;        /* Keeps text on one line */
+    border-top: 1px solid #e0a800;
+    border-bottom: 1px solid #e0a800;
+    padding: 8px 10;
+    position: relative;
+}
+
+.marquee-content {
+    display: inline-block;
+    padding-left: 100%;          /* Start off-screen right */
+    animation: scroll-left 15s linear infinite;  /* Adjust duration as needed */
+    font-weight: 500;
+    font-size: 14px;
+}
+
+.marquee-content i {
+    margin-right: 6px;
+    color: #d32f2f;  /* Red */
+}
+
+/* Keyframes for scrolling */
+@keyframes scroll-left {
+    0% {
+        transform: translateX(0);        /* Start at original position (off-screen right) */
+    }
+    100% {
+        transform: translateX(-100%);    /* Move left by its full width */
+    }
+}
+
+
+.hero-banner {
+    background-color: #1e3c72;
+    color: white;
+    padding: 60px 0;
+}
+
+.hero-banner .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 40px;
+}
+
+.hero-text {
+    flex: 1;
+}
+
+.hero-text h1 {
+    font-size: 42px;
+    font-weight: 700;
+    margin-bottom: 20px;
+    line-height: 1.2;
+}
+
+.hero-text p {
+    font-size: 18px;
+    margin-bottom: 30px;
+    opacity: 0.9;
+}
+
+.btn-hero {
+    display: inline-block;
+    background-color: #f58220;
+    color: white;
+    text-decoration: none;
+    padding: 15px 40px;
+    border-radius: 50px;
+    font-weight: 600;
+    font-size: 16px;
+    transition: background-color 0.3s;
+}
+
+.btn-hero:hover {
+    background-color: #e67102;
+}
+
+.hero-image {
+    flex: 2;
+    text-align: center;
+}
+
+.hero-image img {
+    max-width: 100%;
+    height: 300px;
+    border-radius: 8px;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+}
+
