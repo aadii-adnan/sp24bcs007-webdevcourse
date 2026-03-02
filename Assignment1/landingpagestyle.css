@@ -369,15 +369,8 @@ body {
     margin-bottom: 30px;
 }
 
-.image-row-single {
-    display: flex;
-    justify-content: center;
-}
 
-.image-row-single .image-card {
-    max-width: calc((100% - 20px) / 2);
-    width: 100%;
-}
+
 
 .image-card {
     border-radius: 8px;
