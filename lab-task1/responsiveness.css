@@ -1,0 +1,19 @@
+@media (max-width: 768px) {
+    @media (max-width: 768px){
+        .header .container{
+            flex-direction : column;
+            gap : 15px;
+        }
+    }
+
+    .button-area {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+   
