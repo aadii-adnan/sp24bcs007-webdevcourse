@@ -70,3 +70,24 @@ header{
   overflow:auto;
   padding: 15px;
 }
+
+/* Define the animation */
+@keyframes bounce {
+  0%, 100% {
+      transform: translateY(0);
+  }
+  50% {
+      transform: translateY(-50px);
+  }
+}
+
+/* Apply it */
+.ball {
+  width: 50px;
+  height: 50px;
+  background: red;
+  border-radius: 50%;
+  
+  /* animation: name duration timing-function delay iteration-count direction */
+  animation: bounce 1s ease infinite;
+}
