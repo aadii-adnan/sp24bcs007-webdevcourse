@@ -18,6 +18,9 @@ body{
 h1{
     size: 3em;
     color:beige;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .btn-xl{
@@ -37,4 +40,10 @@ hr{
     color: #ee4b08;
     border-width: 4px;
     max-width: 65px;
+}
+
+.container{
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
