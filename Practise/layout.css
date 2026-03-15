@@ -1,0 +1,52 @@
+body{
+    margin : 0 auto;
+}
+
+.nav-main{
+    background-color: aquamarine;
+    display:flex;
+    list-style: none;
+    font-size: 1em;
+    margin:0;
+}
+
+li{
+    padding: 20px;
+
+
+}
+
+.push{
+    margin-left:auto;
+    margin-right: 20px;
+}
+
+.Content{
+    background-color: brown;
+    height: 50vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size:  2em;
+}
+
+.grid-wrapper{
+    background-color: antiquewhite;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px,1fr));
+}
+
+.box > img{
+    width:100%;
+}
+
+.box{
+    background-color: darkgray;
+    padding: 130px;
+    margin:20px;
+}
+
+footter{
+    background-color: azure;
+    text-align: center;
+}
