@@ -10,7 +10,7 @@ body {
 }
 
 .container {
-    max-width: 1200px;
+    max-width: 1600px;
     margin: 0 auto;
     padding: 0 15px;
 }
@@ -185,11 +185,13 @@ body {
 
 .nav-menu {
     display: flex;
+    justify-content: center;
+    gap: 50px;
+
     list-style: none;
     margin: 0;
     padding: 0;
     flex-wrap: wrap;
-    gap: 20px;
 }
 
 .nav-menu li a {
@@ -230,7 +232,7 @@ body {
 
 .marquee-content {
     display: inline-block;
-    padding-left: 100%;
+    padding-left: 100vw;
     animation: scroll-left 20s linear infinite;
     font-weight: 500;
     font-size: 14px;
@@ -311,7 +313,7 @@ body {
 
 .categories {
     padding: 60px 0;
-    background-color: #f9f9f9;
+    background-color: #f5f5f5;
 }
 
 .section-title {
@@ -346,7 +348,7 @@ body {
 .category-card img {
     width: 100%;
     height: 150px;
-    object-fit: cover;
+    object-fit:contain;
     display: block;
 }
 
@@ -646,18 +648,6 @@ body {
 }
 
 
-.navbar {
-    position: fixed;
-    top: 0;
-    z-index: 10000; 
-}
-
-.header{
-    position : fixed;
-    top:0;
-    z-index: 10000;
-
-}
 
 
 
