@@ -1,0 +1,29 @@
+.hamburger {
+    display: none;
+    background: none;
+    border: none;
+    font-size: 26px;
+    cursor: pointer;
+}
+
+
+
+@media (max-width:768px){
+    .hamburger{
+        display: block;
+        margin-left: auto;
+    }
+
+    .nav-menu {
+        max-height: 0px;
+        flex-direction: column !important;
+        overflow: hidden;
+        width:100%;
+        transition:  max-height 0.3s ease;
+    }
+
+    .nav-menu.open {
+        max-height: 1000px;
+    }
+
+}
