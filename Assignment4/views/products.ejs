@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DVAGO — Products</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/landingpagestyle.css">
+    <link rel="stylesheet" href="/css/products.css">
+</head>
+<body>
+
+    <!-- ===== HEADER ===== -->
+    <header class="header">
+        <div class="container">
+            <div class="logo-area">
+                <h1>DVAGO</h1>
+                <span>Pharmacy & Wellness Experts</span>
+            </div>
+            <div class="search-wrapper">
+                <div class="search-bar">
+                    <form action="/products" method="GET" style="display:contents;">
+                        <button type="submit" style="background:none; border:none; cursor:pointer; padding:0;">
+                            <i class="fas fa-search"></i>
+                        </button>
+                        <input type="text" name="search" placeholder="Search products..." value="<%= search %>" autocomplete="off">
+                    </form>
+                </div>
+            </div>
+            <div class="location-pill">
+                <i class="fas fa-map-marker-alt"></i>
+                <span>No Address Selected</span>
+                <i class="fas fa-chevron-down"></i>
+            </div>
+            <div class="button-area">
+                <button class="btn btn-app"><i class="fas fa-download"></i> Download the App</button>
+                <button class="btn btn-instant"><i class="fas fa-bolt"></i> Instant Order</button>
+            </div>
+
+            <div class="header-icons">
+                <div class="icon">
+                    <i class="far fa-heart"></i>
+                </div>
+                <div class="icon cart">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span class="cart-count">2</span>
+                </div>
+                <div class="icon">
+                    <i class="far fa-user"></i>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- ===== NAV ===== -->
+    <nav class="navbar">
+        <div class="container">
+            <ul class="nav-menu">
+                <li><a href="/">Home</a></li>
+                <li><a href="/products" class="active-nav">Products</a></li>
+                <li><a href="/contact-us">Contact Us</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- ===== PAGE HERO ===== -->
+    <div class="products-hero">
+        <div class="container">
+            <div class="hero-text">
+                <h2>Our Products</h2>
+                <p>Browse <strong><%= totalProducts %></strong> items across all categories</p>
+            </div>
+            <!-- Breadcrumb -->
+            <div class="breadcrumb">
+                <a href="/">Home</a>
+                <i class="fas fa-chevron-right"></i>
+                <span>Products</span>
+                <% if (category) { %>
+                    <i class="fas fa-chevron-right"></i>
+                    <span><%= category %></span>
+                <% } %>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== MAIN CONTENT ===== -->
+    <div class="products-page">
+        <div class="container">
+
+            <!-- ===================================================== -->
+            <!-- FILTERS SIDEBAR + GRID LAYOUT                          -->
+            <!-- ===================================================== -->
+            <div class="catalog-layout">
+
+                <!-- SIDEBAR FILTERS -->
+                <aside class="filters-sidebar">
+                    <div class="sidebar-header">
+                        <h3><i class="fas fa-sliders-h"></i> Filters</h3>
+                        <a href="/products" class="clear-all-link">Clear all</a>
+                    </div>
+
+                    <form class="filters-form" method="GET" action="/products">
+
+                        <!-- SEARCH -->
+                        <div class="filter-section">
+                            <label class="filter-label">Search Products</label>
+                            <div class="search-input-wrap">
+                                <i class="fas fa-search"></i>
+                                <input
+                                    type="text"
+                                    name="search"
+                                    placeholder="e.g. Panadol, Dove..."
+                                    value="<%= search %>"
+                                >
+                            </div>
+                        </div>
+
+                        <!-- CATEGORY -->
+                        <div class="filter-section">
+                            <label class="filter-label">Category</label>
+                            <div class="category-pills">
+                                <label class="pill-label">
+                                    <input type="radio" name="category" value=""
+                                        <%= category === '' ? 'checked' : '' %>>
+                                    <span>All</span>
+                                </label>
+                                <% categories.forEach(function(cat) { %>
+                                    <label class="pill-label">
+                                        <input type="radio" name="category" value="<%= cat %>"
+                                            <%= category === cat ? 'checked' : '' %>>
+                                        <span><%= cat %></span>
+                                    </label>
+                                <% }); %>
+                            </div>
+                        </div>
+
+                        <!-- PRICE RANGE -->
+                        <div class="filter-section">
+                            <label class="filter-label">Price Range (Rs.)</label>
+                            <div class="price-inputs">
+                                <div class="price-field">
+                                    <span class="currency-tag">Rs.</span>
+                                    <input
+                                        type="number"
+                                        name="minPrice"
+                                        placeholder="Min"
+                                        value="<%= minPrice %>"
+                                        min="0"
+                                    >
+                                </div>
+                                <span class="price-dash">—</span>
+                                <div class="price-field">
+                                    <span class="currency-tag">Rs.</span>
+                                    <input
+                                        type="number"
+                                        name="maxPrice"
+                                        placeholder="Max"
+                                        value="<%= maxPrice %>"
+                                        min="0"
+                                    >
+                                </div>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn-apply">
+                            <i class="fas fa-check"></i> Apply Filters
+                        </button>
+
+                    </form>
+
+                    <!-- Active Filters Display -->
+                    <% if (search || category || minPrice || maxPrice) { %>
+                    <div class="active-filters">
+                        <p class="active-filters-title">Active Filters:</p>
+                        <% if (search) { %>
+                            <span class="active-chip">
+                                Search: "<%= search %>"
+                                <a href="/products?category=<%= category %>&minPrice=<%= minPrice %>&maxPrice=<%= maxPrice %>">
+                                    <i class="fas fa-times"></i>
+                                </a>
+                            </span>
+                        <% } %>
+                        <% if (category) { %>
+                            <span class="active-chip">
+                                <%= category %>
+                                <a href="/products?search=<%= search %>&minPrice=<%= minPrice %>&maxPrice=<%= maxPrice %>">
+                                    <i class="fas fa-times"></i>
+                                </a>
+                            </span>
+                        <% } %>
+                        <% if (minPrice || maxPrice) { %>
+                            <span class="active-chip">
+                                Rs. <%= minPrice || '0' %> – <%= maxPrice || 'Any' %>
+                                <a href="/products?search=<%= search %>&category=<%= category %>">
+                                    <i class="fas fa-times"></i>
+                                </a>
+                            </span>
+                        <% } %>
+                    </div>
+                    <% } %>
+                </aside>
+
+                <!-- MAIN PRODUCT AREA -->
+                <main class="products-main">
+
+                    <!-- Results bar -->
+                    <div class="results-bar">
+                        <p class="results-count">
+                            <% if (totalProducts === 0) { %>
+                                No results found
+                            <% } else { %>
+                                Showing
+                                <strong><%= (currentPage - 1) * 8 + 1 %>–<%= Math.min(currentPage * 8, totalProducts) %></strong>
+                                of <strong><%= totalProducts %></strong> products
+                                <% if (search) { %> for "<em><%= search %></em>"<% } %>
+                                <% if (category) { %> in <em><%= category %></em><% } %>
+                            <% } %>
+                        </p>
+                        <div class="page-indicator">
+                            Page <strong><%= currentPage %></strong> of <strong><%= totalPages || 1 %></strong>
+                        </div>
+                    </div>
+
+                    <!-- NO RESULTS STATE -->
+                    <% if (products.length === 0) { %>
+                        <div class="no-results">
+                            <div class="no-results-icon">
+                                <i class="fas fa-box-open"></i>
+                            </div>
+                            <h3>No products found</h3>
+                            <p>We couldn't find anything matching your filters.<br>Try broadening your search or clearing the filters.</p>
+                            <a href="/products" class="btn-apply" style="display:inline-flex; text-decoration:none;">
+                                <i class="fas fa-redo"></i> View All Products
+                            </a>
+                        </div>
+
+                    <% } else { %>
+
+                        <!-- PRODUCTS GRID -->
+                        <div class="products-grid">
+                            <% products.forEach(function(product) { %>
+                                <div class="product-card">
+
+                                    <!-- Wishlist button -->
+                                    <button class="wishlist-btn" title="Add to wishlist">
+                                        <i class="far fa-heart"></i>
+                                    </button>
+
+                                    <!-- Category badge -->
+                                    <span class="product-badge"><%= product.category %></span>
+
+                                    <!-- Image -->
+                                    <div class="product-image-wrap">
+                                        <img
+                                            src="<%= product.image %>"
+                                            alt="<%= product.name %>"
+                                            onerror="this.src='https://placehold.co/300x200/f0f4ff/1e3c72?text=DVAGO'"
+                                        >
+                                    </div>
+
+                                    <!-- Card Body -->
+                                    <div class="product-body">
+                                        <h4 class="product-name"><%= product.name %></h4>
+                                        <p class="product-desc"><%= product.description %></p>
+
+                                        <!-- Rating -->
+                                        <div class="product-meta">
+                                            <div class="rating-row">
+                                                <%
+                                                // Generate filled/empty stars
+                                                const filled = Math.round(product.rating);
+                                                for(let s = 1; s <= 5; s++) {
+                                                %>
+                                                    <i class="<%= s <= filled ? 'fas' : 'far' %> fa-star"></i>
+                                                <% } %>
+                                                <span class="rating-num"><%= product.rating.toFixed(1) %></span>
+                                            </div>
+
+                                            <!-- Stock -->
+                                            <% if (product.stock > 0) { %>
+                                                <span class="stock-badge in-stock">
+                                                    <i class="fas fa-check-circle"></i> In Stock
+                                                </span>
+                                            <% } else { %>
+                                                <span class="stock-badge out-of-stock">
+                                                    <i class="fas fa-times-circle"></i> Out of Stock
+                                                </span>
+                                            <% } %>
+                                        </div>
+
+                                        <!-- Price + CTA -->
+                                        <div class="product-footer">
+                                            <div class="price-block">
+                                                <span class="price-label">Price</span>
+                                                <span class="price-amount">Rs. <%= product.price.toLocaleString() %></span>
+                                            </div>
+                                            <% if (product.stock > 0) { %>
+                                                <button class="btn-cart">
+                                                    <i class="fas fa-cart-plus"></i>
+                                                    <span>Add</span>
+                                                </button>
+                                            <% } else { %>
+                                                <button class="btn-cart btn-cart-disabled" disabled>
+                                                    <i class="fas fa-ban"></i>
+                                                    <span>N/A</span>
+                                                </button>
+                                            <% } %>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            <% }); %>
+                        </div>
+
+                    <% } %>
+
+                    <!-- ===================================================== -->
+                    <!-- PAGINATION                                              -->
+                    <!-- ===================================================== -->
+                    <% if (totalPages > 1) { %>
+                    <%
+                        const filterQuery = new URLSearchParams({
+                            search: search,
+                            category: category,
+                            minPrice: minPrice,
+                            maxPrice: maxPrice
+                        }).toString();
+                    %>
+                    <div class="pagination">
+
+                        <!-- Previous -->
+                        <% if (currentPage > 1) { %>
+                            <a href="/products?<%= filterQuery %>&page=<%= currentPage - 1 %>" class="page-btn page-arrow">
+                                <i class="fas fa-chevron-left"></i>
+                            </a>
+                        <% } else { %>
+                            <span class="page-btn page-arrow disabled">
+                                <i class="fas fa-chevron-left"></i>
+                            </span>
+                        <% } %>
+
+                        <!-- Page numbers with ellipsis logic -->
+                        <%
+                        // Show max 7 page buttons with smart ellipsis
+                        const delta = 2;
+                        const left = currentPage - delta;
+                        const right = currentPage + delta;
+                        let pages = [];
+                        let l;
+
+                        for (let i = 1; i <= totalPages; i++) {
+                            if (i === 1 || i === totalPages || (i >= left && i <= right)) {
+                                pages.push(i);
+                            }
+                        }
+                        %>
+
+                        <% let prevPage = null; %>
+                        <% for (let pi = 0; pi < pages.length; pi++) { %>
+                            <% let pageNum = pages[pi]; %>
+                            <% if (prevPage && pageNum - prevPage > 1) { %>
+                                <span class="page-ellipsis">…</span>
+                            <% } %>
+
+                            <% if (pageNum === currentPage) { %>
+                                <span class="page-btn active"><%= pageNum %></span>
+                            <% } else { %>
+                                <a href="/products?<%= filterQuery %>&page=<%= pageNum %>" class="page-btn">
+                                    <%= pageNum %>
+                                </a>
+                            <% } %>
+
+                            <% prevPage = pageNum; %>
+                        <% } %>
+
+                        <!-- Next -->
+                        <% if (currentPage < totalPages) { %>
+                            <a href="/products?<%= filterQuery %>&page=<%= currentPage + 1 %>" class="page-btn page-arrow">
+                                <i class="fas fa-chevron-right"></i>
+                            </a>
+                        <% } else { %>
+                            <span class="page-btn page-arrow disabled">
+                                <i class="fas fa-chevron-right"></i>
+                            </span>
+                        <% } %>
+
+                    </div>
+                    <!-- End Pagination -->
+                    <% } %>
+
+                </main>
+            </div>
+            <!-- End catalog-layout -->
+
+        </div>
+    </div>
+
+    <!-- ===== FOOTER ===== -->
+    <footer class="footer">
+        <div class="container">
+            <!-- Top section with logo, trust text, and social icons -->
+            <div class="footer-top">
+                <div class="footer-logo">
+                    <h2>D'VAGO</h2>
+                    <span>Pharmacy & Wellness Experts</span>
+                </div>
+                <p class="trusted-text">Pakistan's most trusted pharmacy chain delivering nationwide</p>
+                <div class="follow-us">
+                    <span>Follow us</span>
+                    <div class="social-icons">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                    </div>
+                </div>
+            </div>
+    
+            <!-- Four-column links section -->
+            <div class="footer-links">
+                <div class="footer-col">
+                    <h4>Categories</h4>
+                    <ul>
+                        <li><a href="#">Medicine</a></li>
+                        <li><a href="#">A to Z Medicine</a></li>
+                        <li><a href="#">Baby & Mother Care</a></li>
+                        <li><a href="#">Nutrition & Supplements</a></li>
+                        <li><a href="#">Food & Beverage</a></li>
+                        <li><a href="#">Devices & Appliances</a></li>
+                        <li><a href="#">Personal Care</a></li>
+                        <li><a href="#">OTC And Health Need</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Navigate</h4>
+                    <ul>
+                        <li><a href="#">Feedback</a></li>
+                        <li><a href="#">Instant Order</a></li>
+                        <li><a href="#">Deals</a></li>
+                        <li><a href="#">Stores</a></li>
+                        <li><a href="#">Brands</a></li>
+                        <li><a href="#">Blogs</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Support</h4>
+                    <ul>
+                        <li><a href="#">FAQs</a></li>
+                        <li><a href="#">Terms Of Service</a></li>
+                        <li><a href="#">Shipping Policy</a></li>
+                        <li><a href="#">Return Policy</a></li>
+                        <li><a href="#">Refund Policy</a></li>
+                        <li><a href="#">Privacy Policy</a></li>
+                        <li><a href="#">Careers</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Contact Us</h4>
+                    <address>
+                        1st Floor, Plot No. 1 Shaheed-e-Millat Road,<br>
+                        Modern Society MCHS, Karachi,<br>
+                        Sindh 75100, Pakistan
+                    </address>
+                    <p>Phone: (021) 11 11 D'VAGO (38246)</p>
+                    <p>Email: <a href="mailto:feedback@dvago.pk">feedback@dvago.pk</a></p>
+                </div>
+            </div>
+    
+            <!-- Ramadan banner -->
+            <div class="footer-ramadan">
+                <span class="ramzan-1">All your Ramadan needs</span>
+                <span class="ramzan-2">Shop the Ramadan Essentials now!</span>
+                <a href="#" class="btn-ramadan">Shop Now</a>
+            </div>
+        </div>
+    </footer>
+
+</body>
+</html>

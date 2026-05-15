@@ -1,0 +1,25 @@
+<aside class="admin-sidebar">
+
+  <div class="sidebar-logo">
+    <h2>DVAGO</h2>
+    <span>Admin Panel</span>
+  </div>
+
+  <nav class="sidebar-nav">
+    <a href="/admin" class="<%= activePage === 'dashboard' ? 'active' : '' %>">
+      <i class="fas fa-tachometer-alt"></i> Dashboard
+    </a>
+    <a href="/admin/products" class="<%= activePage === 'products' ? 'active' : '' %>">
+      <i class="fas fa-boxes"></i> All Products
+    </a>
+    <a href="/admin/products/new" class="<%= activePage === 'new' ? 'active' : '' %>">
+      <i class="fas fa-plus-circle"></i> Add New Product
+    </a>
+  </nav>
+
+  <div class="sidebar-bottom">
+    <a href="/"><i class="fas fa-arrow-left"></i> Back to Website</a>
+    <p style="color:rgba(255,255,255,0.3); font-size:11px; margin:10px 0 0;">Admin Panel v1.0</p>
+  </div>
+
+</aside>
