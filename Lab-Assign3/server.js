@@ -3,6 +3,10 @@ const mongoose = require("mongoose");
 const multer = require('multer');
 const path = require('path');
 const Product = require("./models/Product");
+const session = require('express-session');
+const MongoStore = require('connect-mongo').default || require('connect-mongo');
+const flash = require('connect-flash');
+const User = require('./models/User');
 
 // Multer storage setup
 const storage = multer.diskStorage({
@@ -22,7 +26,69 @@ app.use(express.static("public"));
 app.use(express.urlencoded({ extended: true }));
 app.use('/uploads', express.static('public/uploads'));
 
+// ============================================================
+// SESSION SETUP
+// A session is like a wristband — it remembers who is logged in
+// We store sessions in MongoDB so they survive server restarts
+// ============================================================
+app.use(session({
+    secret: 'dvago-secret-key-2024',   // used to scramble the session data
+    resave: false,                      // do not re-save session if nothing changed
+    saveUninitialized: false,           // do not save empty sessions
+    store: MongoStore.create({
+        mongoUrl: 'mongodb://localhost:27017/dvagoDB'  // save sessions in our database
+    }),
+    cookie: {
+        maxAge: 1000 * 60 * 60 * 24    // session lasts 24 hours (in milliseconds)
+    }
+}));
+
+// ============================================================
+// FLASH MESSAGES
+// Flash messages are one-time messages shown after a redirect
+// Example: after login, show "Welcome back!"
+// ============================================================
+app.use(flash());
+
+// ============================================================
+// GLOBAL VARIABLES
+// This makes certain variables available in EVERY EJS template
+// So we do not have to pass them manually to every res.render()
+// ============================================================
+app.use((req, res, next) => {
+    res.locals.currentUser = req.session.user || null;   // who is logged in (or null)
+    res.locals.success = req.flash('success');            // success messages array
+    res.locals.error = req.flash('error');                // error messages array
+    next();
+});
+
 app.set("view engine", "ejs");
+
+// ============================================================
+// MIDDLEWARE: isLoggedIn
+// Protects pages that require login (like checkout)
+// If the user is not logged in, redirect them to the login page
+// ============================================================
+function isLoggedIn(req, res, next) {
+    if (req.session.user) {
+        return next();    // user is logged in, let them through
+    }
+    req.flash('error', 'You must be logged in to access that page.');
+    res.redirect('/login');
+}
+
+// ============================================================
+// MIDDLEWARE: isAdmin
+// Protects the admin panel
+// The user must be logged in AND have role = 'admin'
+// ============================================================
+function isAdmin(req, res, next) {
+    if (req.session.user && req.session.user.role === 'admin') {
+        return next();    // user is an admin, let them through
+    }
+    req.flash('error', 'Access denied. Admins only.');
+    res.redirect('/');    // send them back to homepage
+}
 
 // ============================================================
 // CONNECT TO MONGODB
@@ -136,11 +202,125 @@ app.get("/hobbies", (req, res) => {
 
 
 // ============================================================
+// AUTH ROUTES (REGISTER, LOGIN, LOGOUT)
+// ============================================================
+
+// ============================================================
+// REGISTER — GET: Show the registration form
+// ============================================================
+app.get('/register', (req, res) => {
+    // If already logged in, go to homepage
+    if (req.session.user) return res.redirect('/');
+    res.render('auth/register');
+});
+
+// ============================================================
+// REGISTER — POST: Handle the registration form submission
+// ============================================================
+app.post('/register', async (req, res) => {
+    try {
+        const { name, email, password, confirmPassword } = req.body;
+
+        // Check passwords match
+        if (password !== confirmPassword) {
+            req.flash('error', 'Passwords do not match.');
+            return res.redirect('/register');
+        }
+
+        // Check password length
+        if (password.length < 6) {
+            req.flash('error', 'Password must be at least 6 characters.');
+            return res.redirect('/register');
+        }
+
+        // Check if email is already registered
+        const existingUser = await User.findOne({ email: email });
+        if (existingUser) {
+            req.flash('error', 'That email is already registered. Please log in.');
+            return res.redirect('/register');
+        }
+
+        // Create the new user (password gets hashed automatically by the model)
+        const newUser = new User({ name, email, password, role: 'customer' });
+        await newUser.save();
+
+        // Log them in immediately after registering
+        req.session.user = { id: newUser._id, name: newUser.name, email: newUser.email, role: newUser.role };
+        req.flash('success', 'Account created! Welcome to DVAGO, ' + newUser.name + '!');
+        res.redirect('/');
+
+    } catch (err) {
+        console.error(err);
+        req.flash('error', 'Something went wrong. Please try again.');
+        res.redirect('/register');
+    }
+});
+
+// ============================================================
+// LOGIN — GET: Show the login form
+// ============================================================
+app.get('/login', (req, res) => {
+    // If already logged in, go to homepage
+    if (req.session.user) return res.redirect('/');
+    res.render('auth/login');
+});
+
+// ============================================================
+// LOGIN — POST: Handle the login form submission
+// ============================================================
+app.post('/login', async (req, res) => {
+    try {
+        const { email, password } = req.body;
+
+        // Find the user by email
+        const user = await User.findOne({ email: email });
+        if (!user) {
+            req.flash('error', 'Invalid email or password.');
+            return res.redirect('/login');
+        }
+
+        // Compare the typed password with the hashed one in the database
+        const passwordCorrect = await user.comparePassword(password);
+        if (!passwordCorrect) {
+            req.flash('error', 'Invalid email or password.');
+            return res.redirect('/login');
+        }
+
+        // Save user info in session (this is what keeps them logged in)
+        req.session.user = { id: user._id, name: user.name, email: user.email, role: user.role };
+        req.flash('success', 'Welcome back, ' + user.name + '!');
+
+        // If admin, go to admin dashboard. Otherwise go to homepage.
+        if (user.role === 'admin') {
+            return res.redirect('/admin');
+        }
+        res.redirect('/');
+
+    } catch (err) {
+        console.error(err);
+        req.flash('error', 'Something went wrong. Please try again.');
+        res.redirect('/login');
+    }
+});
+
+// ============================================================
+// LOGOUT — clears the session and redirects to homepage
+// ============================================================
+app.get('/logout', (req, res) => {
+    req.session.destroy((err) => {
+        if (err) console.error(err);
+        res.redirect('/');
+    });
+});
+
+
+
+// ============================================================
 // ADMIN ROUTES
 // ============================================================
 
 // --- ROUTE 1: Admin Dashboard ---
-app.get('/admin', async (req, res) => {
+app.get('/admin', isAdmin, async (req, res) => {
   try {
     const totalProducts = await Product.countDocuments();
     const categories = await Product.distinct('category');
@@ -155,12 +335,12 @@ app.get('/admin', async (req, res) => {
 });
 
 // --- ROUTE 2: Show Add New Product Form ---
-app.get('/admin/products/new', (req, res) => {
+app.get('/admin/products/new', isAdmin, (req, res) => {
   res.render('admin/newProduct', { success: null, error: null });
 });
 
 // --- ROUTE 3: Handle Add New Product Form Submission ---
-app.post('/admin/products/new', upload.single('image'), async (req, res) => {
+app.post('/admin/products/new', isAdmin, upload.single('image'), async (req, res) => {
   try {
     const { name, description, price, category, rating, stock } = req.body;
     if (!name || !price || !category || !stock) {
@@ -177,7 +357,7 @@ app.post('/admin/products/new', upload.single('image'), async (req, res) => {
 });
 
 // --- ROUTE 4: Show Edit Product Form ---
-app.get('/admin/products/edit/:id', async (req, res) => {
+app.get('/admin/products/edit/:id', isAdmin, async (req, res) => {
   try {
     const product = await Product.findById(req.params.id).lean();
     if (!product) return res.redirect('/admin');
@@ -189,7 +369,7 @@ app.get('/admin/products/edit/:id', async (req, res) => {
 });
 
 // --- ROUTE 5: Handle Edit Product Form Submission ---
-app.post('/admin/products/edit/:id', upload.single('image'), async (req, res) => {
+app.post('/admin/products/edit/:id', isAdmin, upload.single('image'), async (req, res) => {
   try {
     const { name, description, price, category, rating, stock } = req.body;
     const updateData = { name, description, price, category, rating, stock };
@@ -205,7 +385,7 @@ app.post('/admin/products/edit/:id', upload.single('image'), async (req, res) =>
 });
 
 // --- ROUTE 6: Handle Delete Product ---
-app.post('/admin/products/delete/:id', async (req, res) => {
+app.post('/admin/products/delete/:id', isAdmin, async (req, res) => {
   try {
     await Product.findByIdAndDelete(req.params.id);
     res.redirect('/admin');
