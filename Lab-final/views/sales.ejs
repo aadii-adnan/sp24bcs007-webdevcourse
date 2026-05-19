@@ -1,0 +1,270 @@
+<!-- Tell the layout which CSS and JS files to load for this page only -->
+<% extraCSS = '/css/sales.css' %>
+
+<!-- ===== HERO BAR ===== -->
+<div class="sales-hero">
+    <div class="container">
+        <div>
+            <h2><i class="fas fa-chart-line" style="margin-right:10px;"></i>Sales Dashboard</h2>
+            <p>Real-time sales statistics — updates every 10 seconds automatically</p>
+        </div>
+        <div class="live-badge">
+            <span class="live-dot"></span>
+            LIVE
+        </div>
+    </div>
+</div>
+
+<div class="sales-page">
+    <div class="container">
+
+        <!-- =================================================
+             STAT CARDS
+             These 4 cards show the key numbers.
+             The server fills them on first load.
+             jQuery updates them every 10 seconds after that.
+             
+             IMPORTANT: Each card has an id="" attribute.
+             jQuery uses these ids to find and update the values.
+        ================================================= -->
+        <div class="stat-cards-row">
+
+            <!-- Card 1: Total Revenue -->
+            <div class="stat-card">
+                <i class="fas fa-rupee-sign stat-card-icon"></i>
+                <div class="stat-card-label">Total Revenue</div>
+                <div class="stat-card-value" id="totalRevenue">
+                    Rs. <%= totalRevenue.toLocaleString() %>
+                </div>
+                <div class="stat-card-sub">All time earnings</div>
+            </div>
+
+            <!-- Card 2: Total Orders -->
+            <div class="stat-card">
+                <i class="fas fa-shopping-bag stat-card-icon"></i>
+                <div class="stat-card-label">Total Orders</div>
+                <div class="stat-card-value" id="totalOrders">
+                    <%= totalOrders %>
+                </div>
+                <div class="stat-card-sub">Orders placed so far</div>
+            </div>
+
+            <!-- Card 3: Average Order Value -->
+            <div class="stat-card">
+                <i class="fas fa-calculator stat-card-icon"></i>
+                <div class="stat-card-label">Avg. Order Value</div>
+                <div class="stat-card-value" id="avgOrderValue">
+                    Rs. <%= avgOrderValue.toLocaleString() %>
+                </div>
+                <div class="stat-card-sub">Per order average</div>
+            </div>
+
+            <!-- Card 4: Delivered Orders -->
+            <div class="stat-card">
+                <i class="fas fa-check-circle stat-card-icon"></i>
+                <div class="stat-card-label">Delivered Orders</div>
+                <div class="stat-card-value" id="deliveredOrders">
+                    <%= deliveredOrders %>
+                </div>
+                <div class="stat-card-sub">Successfully delivered</div>
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             BOTTOM ROW: Top Products + Recent Orders
+        ================================================= -->
+        <div class="dashboard-row">
+
+            <!-- LEFT PANEL: Top 5 Selling Products -->
+            <div class="dashboard-panel">
+                <div class="panel-header">
+                    <h3><i class="fas fa-trophy" style="color:#f5a623; margin-right:8px;"></i>Top Selling Products</h3>
+                </div>
+                <div class="panel-body" id="topProductsList">
+                    <!--
+                        Server renders this list first.
+                        jQuery replaces the inner HTML every 10 seconds.
+                    -->
+                    <% topProducts.forEach(function(item, index) { %>
+                        <div class="top-product-item">
+                            <span class="top-product-rank <%= index === 0 ? 'gold' : index === 1 ? 'silver' : index === 2 ? 'bronze' : '' %>">
+                                <%= index + 1 %>
+                            </span>
+                            <span class="top-product-name"><%= item.name %></span>
+                            <span class="top-product-sold"><%= item.totalSold %> sold</span>
+                        </div>
+                    <% }); %>
+                </div>
+            </div>
+
+            <!-- RIGHT PANEL: Recent Orders -->
+            <div class="dashboard-panel">
+                <div class="panel-header">
+                    <h3><i class="fas fa-clock" style="color:#1e3c72; margin-right:8px;"></i>Recent Orders</h3>
+                </div>
+                <div class="panel-body" id="recentOrdersList">
+                    <table class="orders-table">
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recentOrdersBody">
+                            <!--
+                                Server renders rows first.
+                                jQuery replaces tbody content every 10 seconds.
+                            -->
+                            <% recentOrders.forEach(function(order) { %>
+                                <tr>
+                                    <td style="font-family:monospace; font-size:11px;">#<%= order._id.toString().slice(-6).toUpperCase() %></td>
+                                    <td style="font-weight:700;">Rs. <%= order.totalAmount.toLocaleString() %></td>
+                                    <td>
+                                        <span class="status-badge status-<%= order.status %>">
+                                            <%= order.status %>
+                                        </span>
+                                    </td>
+                                    <td><%= new Date(order.createdAt).toLocaleDateString('en-PK') %></td>
+                                </tr>
+                            <% }); %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+
+
+        <!-- Last Updated timestamp — jQuery updates this too -->
+        <div class="last-updated">
+            <span id="lastUpdatedText">
+                Page loaded at <%= new Date().toLocaleTimeString('en-PK') %> — auto-refreshing every 10 seconds
+            </span>
+        </div>
+
+
+    </div>
+</div>
+
+
+<!-- =================================================
+     JQUERY POLLING SCRIPT
+     
+     This runs in the browser after the page loads.
+     Every 10 seconds it calls /api/sales-data
+     and updates the stat card values without
+     reloading the whole page.
+================================================= -->
+<script>
+$(document).ready(function() {
+
+    // -----------------------------------------------
+    // HELPER: flash a value element yellow briefly
+    // to show the user that the number just updated
+    // -----------------------------------------------
+    function flashUpdate(elementId) {
+        var $el = $('#' + elementId);
+        $el.addClass('updating');
+        setTimeout(function() {
+            $el.removeClass('updating');
+        }, 600);
+    }
+
+    // -----------------------------------------------
+    // HELPER: build the top products HTML from data
+    // -----------------------------------------------
+    function buildTopProducts(topProducts) {
+        var html = '';
+        var rankClasses = ['gold', 'silver', 'bronze'];
+        topProducts.forEach(function(item, index) {
+            var rankClass = rankClasses[index] || '';
+            html += '<div class="top-product-item">';
+            html += '<span class="top-product-rank ' + rankClass + '">' + (index + 1) + '</span>';
+            html += '<span class="top-product-name">' + item.name + '</span>';
+            html += '<span class="top-product-sold">' + item.totalSold + ' sold</span>';
+            html += '</div>';
+        });
+        return html;
+    }
+
+    // -----------------------------------------------
+    // HELPER: build the recent orders table rows
+    // -----------------------------------------------
+    function buildRecentOrders(recentOrders) {
+        var html = '';
+        recentOrders.forEach(function(order) {
+            var shortId = order._id.slice(-6).toUpperCase();
+            var date = new Date(order.createdAt).toLocaleDateString('en-PK');
+            html += '<tr>';
+            html += '<td style="font-family:monospace; font-size:11px;">#' + shortId + '</td>';
+            html += '<td style="font-weight:700;">Rs. ' + order.totalAmount.toLocaleString() + '</td>';
+            html += '<td><span class="status-badge status-' + order.status + '">' + order.status + '</span></td>';
+            html += '<td>' + date + '</td>';
+            html += '</tr>';
+        });
+        return html;
+    }
+
+    // -----------------------------------------------
+    // MAIN FUNCTION: fetch data and update the page
+    // This runs every 10 seconds
+    // -----------------------------------------------
+    function fetchAndUpdate() {
+
+        // Show a loading message in the timestamp bar
+        $('#lastUpdatedText').html('<span class="spinner"></span> Fetching latest data...');
+
+        // Make the AJAX call to our JSON API endpoint
+        $.ajax({
+            url: '/api/sales-data',
+            method: 'GET',
+            dataType: 'json',
+
+            // SUCCESS: we got data back
+            success: function(data) {
+
+                // Update the 4 stat card numbers
+                $('#totalRevenue').text('Rs. ' + data.totalRevenue.toLocaleString());
+                flashUpdate('totalRevenue');
+
+                $('#totalOrders').text(data.totalOrders);
+                flashUpdate('totalOrders');
+
+                $('#avgOrderValue').text('Rs. ' + data.avgOrderValue.toLocaleString());
+                flashUpdate('avgOrderValue');
+
+                $('#deliveredOrders').text(data.deliveredOrders);
+                flashUpdate('deliveredOrders');
+
+                // Update the top products panel
+                $('#topProductsList').html(buildTopProducts(data.topProducts));
+
+                // Update the recent orders table body
+                $('#recentOrdersBody').html(buildRecentOrders(data.recentOrders));
+
+                // Update the last-updated timestamp
+                var now = new Date().toLocaleTimeString('en-PK');
+                $('#lastUpdatedText').text('Last updated at ' + now + ' — next update in 10 seconds');
+            },
+
+            // ERROR: something went wrong
+            error: function() {
+                $('#lastUpdatedText').text('Update failed. Will retry in 10 seconds.');
+            }
+        });
+    }
+
+    // Run fetchAndUpdate every 10 seconds (10000 milliseconds)
+    // setInterval means: repeat this function every X milliseconds
+    setInterval(fetchAndUpdate, 10000);
+
+    // Optional: also run once immediately after 2 seconds
+    // so the data is fresh right away even before 10 seconds
+    setTimeout(fetchAndUpdate, 2000);
+
+});
+</script>

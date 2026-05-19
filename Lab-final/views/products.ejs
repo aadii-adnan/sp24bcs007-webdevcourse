@@ -1,0 +1,153 @@
+<!-- products.ejs -->
+<% extraCSS = '/css/products.css' %>
+
+<div class="products-hero">
+    <div class="container">
+        <div class="hero-text">
+            <h2>Our Products</h2>
+            <p>Browse <strong><%= totalProducts %></strong> items across all categories</p>
+        </div>
+        <div class="breadcrumb">
+            <a href="/">Home</a>
+            <i class="fas fa-chevron-right"></i>
+            <span>Products</span>
+            <% if (category) { %>
+                <i class="fas fa-chevron-right"></i>
+                <span><%= category %></span>
+            <% } %>
+        </div>
+    </div>
+</div>
+
+<div class="products-page">
+    <div class="container">
+        <div class="catalog-layout">
+            <aside class="filters-sidebar">
+                <div class="sidebar-header">
+                    <h3><i class="fas fa-sliders-h"></i> Filters</h3>
+                    <a href="/products" class="clear-all-link">Clear all</a>
+                </div>
+                <form class="filters-form" method="GET" action="/products">
+                    <div class="filter-section">
+                        <label class="filter-label">Search Products</label>
+                        <div class="search-input-wrap">
+                            <i class="fas fa-search"></i>
+                            <input type="text" name="search" placeholder="e.g. Panadol, Dove..." value="<%= search %>">
+                        </div>
+                    </div>
+                    <div class="filter-section">
+                        <label class="filter-label">Category</label>
+                        <div class="category-pills">
+                            <label class="pill-label">
+                                <input type="radio" name="category" value="" <%= category === '' ? 'checked' : '' %>>
+                                <span>All</span>
+                            </label>
+                            <% categories.forEach(function(cat) { %>
+                                <label class="pill-label">
+                                    <input type="radio" name="category" value="<%= cat %>" <%= category === cat ? 'checked' : '' %>>
+                                    <span><%= cat %></span>
+                                </label>
+                            <% }); %>
+                        </div>
+                    </div>
+                    <div class="filter-section">
+                        <label class="filter-label">Price Range (Rs.)</label>
+                        <div class="price-inputs">
+                            <div class="price-field">
+                                <span class="currency-tag">Rs.</span>
+                                <input type="number" name="minPrice" placeholder="Min" value="<%= minPrice %>" min="0">
+                            </div>
+                            <span class="price-dash">—</span>
+                            <div class="price-field">
+                                <span class="currency-tag">Rs.</span>
+                                <input type="number" name="maxPrice" placeholder="Max" value="<%= maxPrice %>" min="0">
+                            </div>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-apply">
+                        <i class="fas fa-check"></i> Apply Filters
+                    </button>
+                </form>
+                <% if (search || category || minPrice || maxPrice) { %>
+                <div class="active-filters">
+                    <p class="active-filters-title">Active Filters:</p>
+                    <% if (search) { %>
+                        <span class="active-chip">
+                            Search: "<%= search %>"
+                            <a href="/products?category=<%= category %>&minPrice=<%= minPrice %>&maxPrice=<%= maxPrice %>"><i class="fas fa-times"></i></a>
+                        </span>
+                    <% } %>
+                    <% if (category) { %>
+                        <span class="active-chip">
+                            <%= category %>
+                            <a href="/products?search=<%= search %>&minPrice=<%= minPrice %>&maxPrice=<%= maxPrice %>"><i class="fas fa-times"></i></a>
+                        </span>
+                    <% } %>
+                </div>
+                <% } %>
+            </aside>
+
+            <main class="products-main">
+                <div class="results-bar">
+                    <p class="results-count">
+                        <% if (totalProducts === 0) { %>
+                            No results found
+                        <% } else { %>
+                            Showing <strong><%= (currentPage - 1) * 8 + 1 %>–<%= Math.min(currentPage * 8, totalProducts) %></strong> of <strong><%= totalProducts %></strong> products
+                        <% } %>
+                    </p>
+                    <div class="page-indicator">
+                        Page <strong><%= currentPage %></strong> of <strong><%= totalPages || 1 %></strong>
+                    </div>
+                </div>
+
+                <% if (products.length === 0) { %>
+                    <div class="no-results">
+                        <h3>No products found</h3>
+                        <a href="/products" class="btn-apply">View All Products</a>
+                    </div>
+                <% } else { %>
+                    <div class="products-grid">
+                        <% products.forEach(function(product) { %>
+                            <div class="product-card">
+                                <span class="product-badge"><%= product.category %></span>
+                                <div class="product-image-wrap">
+                                    <img src="<%= product.image %>" alt="<%= product.name %>" onerror="this.src='/images/panadol.webp'">
+                                </div>
+                                <div class="product-body">
+                                    <h4 class="product-name"><%= product.name %></h4>
+                                    <p class="product-desc"><%= product.description %></p>
+                                    <div class="product-footer">
+                                        <div class="price-block">
+                                            <span class="price-amount">Rs. <%= product.price.toLocaleString() %></span>
+                                        </div>
+                                        <button class="btn-cart">Add</button>
+                                    </div>
+                                </div>
+                            </div>
+                        <% }); %>
+                    </div>
+                <% } %>
+
+                <% if (totalPages > 1) { %>
+                    <% const filterQuery = new URLSearchParams({ search, category, minPrice, maxPrice }).toString(); %>
+                    <div class="pagination">
+                        <% if (currentPage > 1) { %>
+                            <a href="/products?<%= filterQuery %>&page=<%= currentPage - 1 %>" class="page-btn"><i class="fas fa-chevron-left"></i></a>
+                        <% } %>
+                        <% for (let i = 1; i <= totalPages; i++) { %>
+                            <% if (i === currentPage) { %>
+                                <span class="page-btn active"><%= i %></span>
+                            <% } else { %>
+                                <a href="/products?<%= filterQuery %>&page=<%= i %>" class="page-btn"><%= i %></a>
+                            <% } %>
+                        <% } %>
+                        <% if (currentPage < totalPages) { %>
+                            <a href="/products?<%= filterQuery %>&page=<%= currentPage + 1 %>" class="page-btn"><i class="fas fa-chevron-right"></i></a>
+                        <% } %>
+                    </div>
+                <% } %>
+            </main>
+        </div>
+    </div>
+</div>
